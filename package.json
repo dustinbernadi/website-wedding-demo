@@ -5,7 +5,7 @@
   "description": "Demo portofolio undangan pernikahan digital statis — Next.js, React, Tailwind CSS, Motion.",
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "next build --webpack",
     "start": "next start",
     "lint": "eslint"
   },
