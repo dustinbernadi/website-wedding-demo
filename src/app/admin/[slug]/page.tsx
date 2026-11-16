@@ -1,29 +1,22 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { createAdminSupabase } from "@/lib/supabase-admin";
 import { verifySession } from "@/lib/auth";
 import { formatRelative, formatShortDate } from "@/lib/format";
 import {
-  mapWedding,
-  mapGuest,
-  mapRsvp,
-  mapWish,
-  mapRows,
-} from "@/lib/mappers";
+  DEMO_SLUG,
+  demoGuests,
+  demoRsvps,
+  demoWedding,
+  demoWishes,
+} from "@/lib/demo-data";
 import {
   ATTENDANCE_LABELS,
   ATTENDANCE_VALUES,
   WISH_STATUS_LABELS,
   WISH_STATUS_VALUES,
 } from "@/lib/admin-labels";
-import {
-  addGuest,
-  deleteWish,
-  logout,
-  setWishStatus,
-  updateRsvpStatus,
-} from "@/app/admin/[slug]/actions";
+import { logout } from "@/app/admin/[slug]/actions";
 import GuestLinkList from "@/components/admin/GuestLinkList";
 
 type Props = {
@@ -33,17 +26,8 @@ type Props = {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const supabase = createAdminSupabase();
-  let weddingTitle = "Dashboard";
-  if (supabase) {
-    const { data } = await supabase
-      .from("wedding")
-      .select("groom_name, bride_name")
-      .eq("slug", slug)
-      .maybeSingle();
-    if (data) weddingTitle = `${data.groom_name} & ${data.bride_name}`;
-  }
-  return { title: weddingTitle };
+  if (slug !== DEMO_SLUG) return { title: "Dashboard" };
+  return { title: `${demoWedding.groomName} & ${demoWedding.brideName}` };
 }
 
 const badgeTones: Record<string, string> = {
@@ -102,41 +86,13 @@ const buttonClass =
 export default async function AdminDashboardPage({ params, searchParams }: Props) {
   const { slug } = await params;
   await verifySession();
+  if (slug !== DEMO_SLUG) notFound();
   const { rsvp, wishes, q } = await searchParams;
 
-  const supabase = createAdminSupabase();
-  if (!supabase) notFound();
-
-  const { data: weddingRow, error: weddingError } = await supabase
-    .from("wedding")
-    .select("*")
-    .eq("slug", slug)
-    .maybeSingle();
-  if (weddingError || !weddingRow) notFound();
-
-  const wedding = mapWedding(weddingRow);
-
-  const [{ data: guestRows }, { data: rsvpRows }, { data: wishRows }] = await Promise.all([
-    supabase
-      .from("guest")
-      .select("*")
-      .eq("wedding_id", wedding.id)
-      .order("created_at", { ascending: true }),
-    supabase
-      .from("rsvp")
-      .select("*")
-      .eq("wedding_id", wedding.id)
-      .order("created_at", { ascending: false }),
-    supabase
-      .from("wish")
-      .select("*")
-      .eq("wedding_id", wedding.id)
-      .order("created_at", { ascending: false }),
-  ]);
-
-  const guests = mapRows(guestRows, mapGuest);
-  const rsvps = mapRows(rsvpRows, mapRsvp);
-  const wishesAll = mapRows(wishRows, mapWish);
+  const wedding = demoWedding;
+  const guests = demoGuests;
+  const rsvps = demoRsvps;
+  const wishesAll = demoWishes;
 
   const rsvpFilter = rsvp && ATTENDANCE_VALUES.includes(rsvp as (typeof ATTENDANCE_VALUES)[number])
     ? rsvp
@@ -213,6 +169,10 @@ export default async function AdminDashboardPage({ params, searchParams }: Props
           </nav>
         </div>
       </header>
+
+      <div className="border-b border-amber-200 bg-amber-50 px-6 py-2 text-center text-xs text-amber-800">
+        Mode demo statis — data contoh; perubahan tidak disimpan.
+      </div>
 
       <div className="mx-auto max-w-6xl space-y-14 px-6 py-10">
         <section>
@@ -299,14 +259,13 @@ export default async function AdminDashboardPage({ params, searchParams }: Props
                       </td>
                       <td className="px-4 py-3 text-stone-500">{formatRelative(item.createdAt)}</td>
                       <td className="px-4 py-3">
-                        <form action={updateRsvpStatus} className="flex items-center gap-2">
-                          <input type="hidden" name="slug" value={slug} />
-                          <input type="hidden" name="id" value={item.id} />
+                        <div className="flex items-center gap-2">
                           <select
-                            name="attendance"
                             defaultValue={item.attendance}
                             className={inputClass}
                             aria-label={`Status kehadiran ${item.name}`}
+                            disabled
+                            title="Mode demo statis"
                           >
                             {ATTENDANCE_VALUES.map((value) => (
                               <option key={value} value={value}>
@@ -315,12 +274,13 @@ export default async function AdminDashboardPage({ params, searchParams }: Props
                             ))}
                           </select>
                           <button
-                            type="submit"
-                            className={`${buttonClass} border-emerald-700 text-emerald-700 hover:bg-emerald-50`}
+                            type="button"
+                            disabled
+                            className={`${buttonClass} border-emerald-700 text-emerald-700 disabled:cursor-not-allowed disabled:opacity-50`}
                           >
                             Simpan
                           </button>
-                        </form>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -331,11 +291,7 @@ export default async function AdminDashboardPage({ params, searchParams }: Props
         </section>
 
         <section>
-          <form
-            action={addGuest}
-            className="mb-4 flex flex-wrap items-end gap-3 rounded-lg border border-stone-200 bg-white p-3"
-          >
-            <input type="hidden" name="slug" value={slug} />
+          <div className="mb-4 flex flex-wrap items-end gap-3 rounded-lg border border-stone-200 bg-white p-3">
             <div className="min-w-[180px] flex-1">
               <label
                 htmlFor="guest-name"
@@ -346,7 +302,6 @@ export default async function AdminDashboardPage({ params, searchParams }: Props
               <input
                 id="guest-name"
                 name="name"
-                required
                 maxLength={200}
                 placeholder="cth. Budi Santoso"
                 className={inputClass}
@@ -368,12 +323,14 @@ export default async function AdminDashboardPage({ params, searchParams }: Props
               />
             </div>
             <button
-              type="submit"
-              className={`${buttonClass} border-emerald-700 bg-emerald-800 text-emerald-50 hover:bg-emerald-900`}
+              type="button"
+              disabled
+              title="Mode demo statis"
+              className={`${buttonClass} border-emerald-700 bg-emerald-800 text-emerald-50 disabled:cursor-not-allowed disabled:opacity-50`}
             >
               Tambah Tamu
             </button>
-          </form>
+          </div>
           <GuestLinkList slug={slug} guests={guests} />
         </section>
 
@@ -456,41 +413,33 @@ export default async function AdminDashboardPage({ params, searchParams }: Props
                   <p className="mt-2 text-sm leading-relaxed text-stone-700">{wish.message}</p>
                   <div className="mt-4 flex flex-wrap gap-2">
                     {wish.status !== "APPROVED" && (
-                      <form action={setWishStatus}>
-                        <input type="hidden" name="slug" value={slug} />
-                        <input type="hidden" name="id" value={wish.id} />
-                        <input type="hidden" name="status" value="APPROVED" />
-                        <button
-                          type="submit"
-                          className={`${buttonClass} border-emerald-700 text-emerald-700 hover:bg-emerald-50`}
-                        >
-                          Setujui
-                        </button>
-                      </form>
+                      <button
+                        type="button"
+                        disabled
+                        title="Mode demo statis"
+                        className={`${buttonClass} border-emerald-700 text-emerald-700 disabled:cursor-not-allowed disabled:opacity-50`}
+                      >
+                        Setujui
+                      </button>
                     )}
                     {wish.status !== "REJECTED" && (
-                      <form action={setWishStatus}>
-                        <input type="hidden" name="slug" value={slug} />
-                        <input type="hidden" name="id" value={wish.id} />
-                        <input type="hidden" name="status" value="REJECTED" />
-                        <button
-                          type="submit"
-                          className={`${buttonClass} border-amber-600 text-amber-700 hover:bg-amber-50`}
-                        >
-                          Tolak
-                        </button>
-                      </form>
-                    )}
-                    <form action={deleteWish}>
-                      <input type="hidden" name="slug" value={slug} />
-                      <input type="hidden" name="id" value={wish.id} />
                       <button
-                        type="submit"
-                        className={`${buttonClass} border-red-600 text-red-700 hover:bg-red-50`}
+                        type="button"
+                        disabled
+                        title="Mode demo statis"
+                        className={`${buttonClass} border-amber-600 text-amber-700 disabled:cursor-not-allowed disabled:opacity-50`}
                       >
-                        Hapus
+                        Tolak
                       </button>
-                    </form>
+                    )}
+                    <button
+                      type="button"
+                      disabled
+                      title="Mode demo statis"
+                      className={`${buttonClass} border-red-600 text-red-700 disabled:cursor-not-allowed disabled:opacity-50`}
+                    >
+                      Hapus
+                    </button>
                   </div>
                 </li>
               ))}

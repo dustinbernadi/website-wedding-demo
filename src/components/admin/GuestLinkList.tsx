@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { deleteGuest } from "@/app/admin/[slug]/actions";
 
 type GuestRow = {
   id: string;
@@ -95,17 +94,15 @@ export default function GuestLinkList({ slug, guests }: Props) {
                 >
                   {copiedId === guest.id ? "Disalin!" : "Salin Link"}
                 </button>
-                <form action={deleteGuest}>
-                  <input type="hidden" name="slug" value={slug} />
-                  <input type="hidden" name="id" value={guest.id} />
-                  <button
-                    type="submit"
-                    className={`${buttonClass} border-rose-200 text-rose-700 hover:bg-rose-50`}
-                    aria-label={`Hapus ${guest.name}`}
-                  >
-                    Hapus
-                  </button>
-                </form>
+                <button
+                  type="button"
+                  disabled
+                  title="Mode demo statis"
+                  className={`${buttonClass} border-rose-200 text-rose-700 disabled:cursor-not-allowed disabled:opacity-50`}
+                  aria-label={`Hapus ${guest.name}`}
+                >
+                  Hapus
+                </button>
               </div>
             </li>
           ))}

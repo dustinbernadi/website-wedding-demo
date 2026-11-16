@@ -1,11 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { useActionState } from "react";
 import { formatDistanceToNowStrict } from "date-fns";
 import { id as idLocale } from "date-fns/locale";
 import { motion } from "motion/react";
-import { submitWish, type ActionState } from "@/app/undangan/[slug]/actions";
 import SectionHeading from "./SectionHeading";
 import { LeafCluster } from "./FlowerOrnament";
 import { EASE, Reveal } from "./motion";
@@ -19,8 +17,13 @@ export type WishItem = {
 };
 
 type Props = {
-  slug: string;
   wishes: WishItem[];
+};
+
+type DemoState = {
+  ok: boolean;
+  message?: string;
+  fieldErrors?: Record<string, string>;
 };
 
 const EMOJIS = ["🙏", "❤️", "🥂", "🎉", "✨", "🌿"];
@@ -39,23 +42,55 @@ function relativeTime(value: Date | string): string {
   }
 }
 
-export default function WishesSection({ slug, wishes }: Props) {
-  const [state, formAction, pending] = useActionState<ActionState, FormData>(
-    submitWish,
-    { ok: false },
-  );
+export default function WishesSection({ wishes }: Props) {
+  const [items, setItems] = useState<WishItem[]>(wishes);
+  const [state, setState] = useState<DemoState>({ ok: false });
   const [formKey, setFormKey] = useState(0);
   const [emoji, setEmoji] = useState("");
   const [message, setMessage] = useState("");
-  const [wasOk, setWasOk] = useState(false);
 
-  if (state.ok && !wasOk) {
-    setWasOk(true);
-    setFormKey((key) => key + 1);
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+
+    // Jebakan bot: perlakukan seolah berhasil tanpa melakukan apa pun.
+    if (String(formData.get("website") ?? "").trim()) {
+      setState({
+        ok: true,
+        message: "Terima kasih! Ucapan Anda tercatat pada demo ini.",
+      });
+      return;
+    }
+
+    const name = String(formData.get("name") ?? "").trim();
+    const errors: Record<string, string> = {};
+    if (!name) errors.name = "Nama wajib diisi.";
+    else if (name.length > 100) errors.name = "Nama maksimal 100 karakter.";
+    if (!message.trim()) errors.message = "Ucapan tidak boleh kosong.";
+    else if (message.length > 500) errors.message = "Ucapan maksimal 500 karakter.";
+
+    if (Object.keys(errors).length > 0) {
+      setState({ ok: false, fieldErrors: errors });
+      return;
+    }
+
+    const newWish: WishItem = {
+      id: `demo-wish-baru-${Date.now()}`,
+      name,
+      message: message.trim(),
+      emoji: emoji || null,
+      createdAt: new Date(),
+    };
+
+    setItems((current) => [newWish, ...current]);
+    setState({
+      ok: true,
+      message:
+        "Terima kasih! Ucapan Anda ditambahkan ke daftar demo ini (tidak dikirim ke server).",
+    });
     setEmoji("");
     setMessage("");
-  } else if (!state.ok && wasOk) {
-    setWasOk(false);
+    setFormKey((key) => key + 1);
   }
 
   return (
@@ -70,14 +105,18 @@ export default function WishesSection({ slug, wishes }: Props) {
           eyebrow="Kirim Doa & Ucapan"
           title="Ucapan & Doa"
           subtitle={
-            wishes.length > 0
-              ? `${wishes.length} ucapan dan doa telah diterima`
+            items.length > 0
+              ? `${items.length} ucapan dan doa telah diterima`
               : "Jadilah yang pertama berbagi doa dan ucapan untuk kedua mempelai"
           }
         />
       </Reveal>
 
-      {state.ok && (
+      <p className="mx-auto mb-8 max-w-md text-center text-xs text-[var(--ink-muted)]/80 italic">
+        Mode demo statis: ucapan baru hanya tersimpan selama halaman ini terbuka.
+      </p>
+
+      {state.ok && state.message && (
         <p
           role="status"
           className="mb-6 border border-[var(--accent)]/40 bg-[var(--accent-soft)] px-4 py-3 text-center text-sm text-[var(--ink)]"
@@ -94,9 +133,12 @@ export default function WishesSection({ slug, wishes }: Props) {
         </p>
       )}
 
-      <form key={formKey} action={formAction} className="mx-auto max-w-md space-y-6" noValidate>
-        <input type="hidden" name="slug" value={slug} />
-        <input type="hidden" name="emoji" value={emoji} />
+      <form
+        key={formKey}
+        onSubmit={handleSubmit}
+        className="mx-auto max-w-md space-y-6"
+        noValidate
+      >
         <div aria-hidden="true" className="absolute -left-[9999px] h-0 w-0 overflow-hidden">
           <label htmlFor="wish-website">Website</label>
           <input
@@ -186,15 +228,14 @@ export default function WishesSection({ slug, wishes }: Props) {
 
         <motion.button
           type="submit"
-          disabled={pending}
           whileTap={{ scale: 0.97 }}
-          className="w-full border border-[var(--accent)] px-6 py-4 font-display text-lg italic text-[var(--accent)] transition-all hover:bg-[var(--accent)] hover:text-[var(--paper)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)] disabled:cursor-not-allowed disabled:opacity-60"
+          className="w-full border border-[var(--accent)] px-6 py-4 font-display text-lg italic text-[var(--accent)] transition-all hover:bg-[var(--accent)] hover:text-[var(--paper)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)]"
         >
-          {pending ? "Mengirim..." : "Kirim Ucapan"}
+          Kirim Ucapan
         </motion.button>
       </form>
 
-      {wishes.length > 0 && (
+      {items.length > 0 && (
         <motion.ul
           initial="hidden"
           whileInView="show"
@@ -205,7 +246,7 @@ export default function WishesSection({ slug, wishes }: Props) {
           }}
           className="mx-auto mt-12 max-w-md space-y-4"
         >
-          {wishes.map((wish) => (
+          {items.map((wish) => (
             <motion.li
               key={wish.id}
               variants={{

@@ -3,11 +3,11 @@
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { themeVars } from "@/lib/themes";
+import { useGuestName } from "@/lib/use-guest-name";
 import { Entrance } from "./motion";
 import { GoldDivider } from "./FlowerOrnament";
 
 type Props = {
-  guestName: string | null;
   groomName: string;
   brideName: string;
   dateLabel: string;
@@ -17,7 +17,6 @@ type Props = {
 };
 
 export default function OpenGate({
-  guestName,
   groomName,
   brideName,
   dateLabel,
@@ -26,6 +25,7 @@ export default function OpenGate({
   children,
 }: Props) {
   const [open, setOpen] = useState(false);
+  const guestName = useGuestName();
 
   useEffect(() => {
     if (!open) {

@@ -2,17 +2,14 @@
   "name": "undangan-digital-demo",
   "version": "1.0.0",
   "private": true,
-  "description": "Demo portofolio undangan pernikahan digital — Next.js, React, Tailwind CSS, Supabase.",
+  "description": "Demo portofolio undangan pernikahan digital statis — Next.js, React, Tailwind CSS, Motion.",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint",
-    "db:seed": "tsx scripts/seed-demo.ts",
-    "db:seed:demo": "tsx scripts/seed-demo.ts"
+    "lint": "eslint"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.112.3",
     "date-fns": "^4.4.0",
     "date-fns-tz": "^3.2.0",
     "jose": "^6.2.8",
@@ -26,11 +23,9 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "dotenv": "^17.4.2",
     "eslint": "^9",
     "eslint-config-next": "16.3.0",
     "tailwindcss": "^4",
-    "tsx": "^4.23.11",
     "typescript": "^5"
   }
 }

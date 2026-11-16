@@ -1,16 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { useActionState } from "react";
 import { motion } from "motion/react";
-import { submitRsvp, type ActionState } from "@/app/undangan/[slug]/actions";
 import SectionHeading from "./SectionHeading";
 import { GoldDivider, FloralSpray } from "./FlowerOrnament";
 import { Reveal } from "./motion";
+import { useGuestName } from "@/lib/use-guest-name";
 
-type Props = {
-  slug: string;
-  guestName?: string | null;
+type DemoState = {
+  ok: boolean;
+  message?: string;
+  fieldErrors?: Record<string, string>;
 };
 
 const ATTENDANCE_OPTIONS = [
@@ -44,22 +44,57 @@ const ATTENDANCE_OPTIONS = [
   },
 ];
 
+const ATTENDANCE_VALUES = ATTENDANCE_OPTIONS.map((option) => option.value);
+
 const inputClass =
   "w-full border-0 border-b border-[var(--accent)]/30 bg-transparent px-1 py-3 text-[var(--ink)] placeholder:text-[var(--ink-muted)]/50 focus:border-[var(--accent)] focus:outline-none focus:ring-0 transition-colors";
 
-export default function RsvpSection({ slug, guestName }: Props) {
-  const [state, formAction, pending] = useActionState<ActionState, FormData>(
-    submitRsvp,
-    { ok: false },
-  );
+export default function RsvpSection() {
+  const guestName = useGuestName();
+  const [state, setState] = useState<DemoState>({ ok: false });
   const [formKey, setFormKey] = useState(0);
-  const [wasOk, setWasOk] = useState(false);
 
-  if (state.ok && !wasOk) {
-    setWasOk(true);
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+
+    // Jebakan bot: perlakukan seolah berhasil tanpa melakukan apa pun.
+    if (String(formData.get("website") ?? "").trim()) {
+      setState({
+        ok: true,
+        message: "Terima kasih! Konfirmasi Anda tercatat pada demo ini.",
+      });
+      return;
+    }
+
+    const name = String(formData.get("name") ?? "").trim();
+    const attendance = String(formData.get("attendance") ?? "");
+    const guestCountRaw = Number(formData.get("guestCount") ?? "1");
+    const phone = String(formData.get("phone") ?? "").trim();
+    const note = String(formData.get("note") ?? "").trim();
+
+    const errors: Record<string, string> = {};
+    if (!name) errors.name = "Nama wajib diisi.";
+    else if (name.length > 100) errors.name = "Nama maksimal 100 karakter.";
+    if (!ATTENDANCE_VALUES.includes(attendance))
+      errors.attendance = "Pilih konfirmasi kehadiran.";
+    const guestCount = Number.isInteger(guestCountRaw) ? guestCountRaw : 1;
+    if (guestCount < 1 || guestCount > 20)
+      errors.guestCount = "Jumlah tamu antara 1–20.";
+    if (phone.length > 20) errors.phone = "Nomor maksimal 20 digit.";
+    if (note.length > 500) errors.note = "Catatan maksimal 500 karakter.";
+
+    if (Object.keys(errors).length > 0) {
+      setState({ ok: false, fieldErrors: errors });
+      return;
+    }
+
+    setState({
+      ok: true,
+      message:
+        "Terima kasih! Konfirmasi Anda tercatat pada demo ini (tidak dikirim ke server).",
+    });
     setFormKey((key) => key + 1);
-  } else if (!state.ok && wasOk) {
-    setWasOk(false);
   }
 
   return (
@@ -74,7 +109,12 @@ export default function RsvpSection({ slug, guestName }: Props) {
         />
       </Reveal>
 
-      {state.ok && (
+      <p className="mx-auto mb-8 max-w-md text-center text-xs text-[var(--ink-muted)]/80 italic">
+        Mode demo statis: konfirmasi hanya disimulasikan di browser dan tidak
+        disimpan ke database.
+      </p>
+
+      {state.ok && state.message && (
         <p
           role="status"
           className="mb-6 border border-[var(--accent)]/40 bg-[var(--accent-soft)] px-4 py-3 text-center text-sm text-[var(--ink)]"
@@ -91,8 +131,12 @@ export default function RsvpSection({ slug, guestName }: Props) {
         </p>
       )}
 
-      <form key={formKey} action={formAction} className="mx-auto max-w-md space-y-8" noValidate>
-        <input type="hidden" name="slug" value={slug} />
+      <form
+        key={formKey}
+        onSubmit={handleSubmit}
+        className="mx-auto max-w-md space-y-8"
+        noValidate
+      >
         <div aria-hidden="true" className="absolute -left-[9999px] h-0 w-0 overflow-hidden">
           <label htmlFor="rsvp-website">Website</label>
           <input
@@ -109,6 +153,7 @@ export default function RsvpSection({ slug, guestName }: Props) {
             Nama
           </label>
           <input
+            key={`rsvp-name-${guestName ?? ""}`}
             id="rsvp-name"
             name="name"
             type="text"
@@ -218,11 +263,10 @@ export default function RsvpSection({ slug, guestName }: Props) {
 
         <motion.button
           type="submit"
-          disabled={pending}
           whileTap={{ scale: 0.97 }}
-          className="w-full border border-[var(--accent)] px-6 py-4 font-display text-lg italic text-[var(--accent)] transition-all hover:bg-[var(--accent)] hover:text-[var(--paper)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)] disabled:cursor-not-allowed disabled:opacity-60"
+          className="w-full border border-[var(--accent)] px-6 py-4 font-display text-lg italic text-[var(--accent)] transition-all hover:bg-[var(--accent)] hover:text-[var(--paper)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)]"
         >
-          {pending ? "Menyimpan..." : "Kirim Konfirmasi"}
+          Kirim Konfirmasi
         </motion.button>
       </form>
     </section>

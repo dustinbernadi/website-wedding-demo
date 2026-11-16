@@ -1,4 +1,4 @@
-# Undangan Digital — Demo Portofolio
+# Undangan Digital — Demo Portofolio (Statis)
 
 Demo portofolio undangan pernikahan digital: satu halaman interaktif berbahasa Indonesia
 yang dibuka tamu lewat tautan, lengkap dengan konfirmasi kehadiran dan buku ucapan.
@@ -12,6 +12,10 @@ yang dibuka tamu lewat tautan, lengkap dengan konfirmasi kehadiran dan buku ucap
 - **Slug undangan:** `/undangan/demo-raka-nadia`
 - **Tema:** `vintage-gold`
 
+Demo ini **tidak memakai database**. Seluruh konten undangan dibaca dari
+`src/lib/demo-data.ts`, sehingga halaman bisa dirender statis dan tidak memerlukan
+Supabase atau layanan backend lain.
+
 ## Fitur
 
 - Halaman pembuka (gate) dengan nama tamu dari query `?to=Nama`
@@ -21,21 +25,22 @@ yang dibuka tamu lewat tautan, lengkap dengan konfirmasi kehadiran dan buku ucap
 - Galeri foto dengan lightbox
 - Peta lokasi acara
 - Amplop digital (rekening bank / dompet digital) dengan salin nomor
-- Form konfirmasi kehadiran (RSVP)
-- Buku ucapan dengan moderasi admin
+- Form konfirmasi kehadiran (simulasi di browser)
+- Buku ucapan (simulasi di browser)
 - Live streaming opsional
-- Musik latar opsional (diisi lewat `music_url` pada data undangan)
+- Musik latar opsional (diisi lewat `musicUrl` pada data undangan)
 - 7 pilihan tema warna
 - Layout mobile-first yang juga nyaman di desktop
+- Pratinjau panel admin read-only (disembunyikan dari publik)
 
 ## Teknologi
 
 | Lapisan | Teknologi |
 | --- | --- |
-| Framework | Next.js 16 (App Router, Server Actions, Proxy) |
+| Framework | Next.js 16 (App Router, Proxy) |
 | UI | React 19, Tailwind CSS v4, Motion |
-| Database | Supabase (PostgreSQL + Row Level Security) |
-| Deployment | Vercel (termasuk Cron Job) |
+| Data | Data statis di `src/lib/demo-data.ts` |
+| Deployment | Vercel (atau hosting Next.js lainnya) |
 | Bahasa | TypeScript |
 
 ## Menjalankan Secara Lokal
@@ -48,118 +53,79 @@ Prasyarat: Node.js 20+ dan npm.
    npm install
    ```
 
-2. Buat project Supabase **baru dan terpisah** untuk demo ini, lalu jalankan
-   `supabase/schema.sql` di SQL Editor project tersebut.
-
-3. Salin `.env.example` menjadi `.env` dan isi nilainya:
-
-   ```bash
-   cp .env.example .env
-   ```
-
-4. Isi data demo:
-
-   ```bash
-   npm run db:seed
-   ```
-
-   Seed bersifat idempotent: menjalankannya lagi akan mengembalikan data demo ke
-   kondisi awal tanpa menyentuh undangan lain di database yang sama.
-
-5. Jalankan aplikasi:
+2. Jalankan aplikasi:
 
    ```bash
    npm run dev
    ```
 
-   Buka <http://localhost:3000/undangan/demo-raka-nadia>.
-   Tambahkan `?to=Nama%20Tamu` untuk mencoba sapaan tamu.
+   Buka <http://localhost:3000>. Tambahkan `?to=Nama%20Tamu` untuk mencoba sapaan tamu:
+
+   <http://localhost:3000/undangan/demo-raka-nadia?to=Budi%20Santoso>
+
+Tidak ada langkah seed atau konfigurasi database.
+
+## Form Publik
+
+Karena situs ini statis:
+
+- **RSVP** memvalidasi isian lalu menampilkan pesan sukses. Data tidak dikirim ke server.
+- **Ucapan** ditambahkan ke daftar di halaman selama sesi berlangsung, lalu hilang saat
+  halaman dimuat ulang.
+
+Perilaku ini disengaja agar demo tetap bisa dicoba tanpa backend. Jika nanti ingin
+menyimpan data sungguhan, form dapat dihubungkan kembali ke API/database.
+
+## Panel Admin (Pratinjau)
+
+Panel admin disertakan sebagai **pratinjau read-only** untuk keperluan screenshot
+portofolio. Datanya berasal dari data demo yang sama; tombol perubahan dinonaktifkan.
+
+Panel ini **disembunyikan dari publik** oleh `src/proxy.ts`. Selama
+`DEMO_ADMIN_HIDDEN` bukan `false`, semua request ke `/admin` dan turunannya dijawab
+sebagai `404` — termasuk halaman login.
+
+Untuk membukanya secara lokal:
+
+1. Salin `.env.example` menjadi `.env`.
+2. Isi `ADMIN_PASSWORD` dan `SESSION_SECRET` (string acak yang panjang).
+3. Set `DEMO_ADMIN_HIDDEN="false"`.
+4. Restart `npm run dev`, lalu buka `/admin`.
+
+Pada deployment demo publik, biarkan `DEMO_ADMIN_HIDDEN="true"` (atau kosong) agar panel
+tetap tidak terlihat.
 
 ## Variabel Lingkungan
 
 | Variabel | Wajib | Keterangan |
 | --- | --- | --- |
-| `NEXT_PUBLIC_SUPABASE_URL` | Ya | URL project Supabase |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Ya | Anon key (hanya baca konten publik via RLS) |
-| `SUPABASE_SERVICE_ROLE_KEY` | Ya | Service role key; hanya dipakai di server |
-| `SESSION_SECRET` | Ya (produksi) | Secret untuk cookie sesi admin |
-| `ADMIN_PASSWORD` | Ya (produksi) | Password panel admin |
-| `DEMO_ADMIN_HIDDEN` | Tidak | Default `true`. Set `false` untuk membuka `/admin` secara lokal |
 | `NEXT_PUBLIC_SITE_URL` | Ya (deploy) | URL publik, dipakai untuk metadata dan Open Graph |
-| `CRON_SECRET` | Ya (deploy) | Secret untuk endpoint reset data demo |
-
-## Panel Admin
-
-Panel admin **disembunyikan dari publik** oleh `src/proxy.ts`. Selama
-`DEMO_ADMIN_HIDDEN` bukan `false`, semua request ke `/admin` dan turunannya dijawab
-sebagai `404` — termasuk halaman login dan server action-nya.
-
-Untuk mengelola undangan secara lokal:
-
-```env
-DEMO_ADMIN_HIDDEN="false"
-```
-
-Lalu restart `npm run dev` dan buka `/admin`. Pada deployment demo publik, biarkan
-`DEMO_ADMIN_HIDDEN="true"` (atau kosongkan) agar panel tetap tidak terlihat.
-
-## Reset Data Demo
-
-Data demo di-reset otomatis setiap hari agar tetap bersih setelah dikunjungi publik.
-
-- **Cron Vercel:** `vercel.json` memanggil `GET /api/demo/reset` setiap `0 17 * * *` UTC
-  (00:00 WIB). Vercel mengirim header `Authorization: Bearer <CRON_SECRET>`.
-- **Manual:**
-
-  ```bash
-  curl -H "Authorization: Bearer $CRON_SECRET" https://domain-demo.vercel.app/api/demo/reset
-  ```
-
-  atau `GET /api/demo/reset?secret=<CRON_SECRET>`.
-
-Endpoint ini menolak request tanpa secret yang benar dan tidak menyentuh undangan lain
-di database yang sama.
-
-## Perlindungan Form Publik
-
-- **Honeypot** pada form RSVP dan ucapan; isian bot dibalas seolah berhasil tanpa disimpan.
-- **Rate limit** 5 kiriman / 10 menit per IP (in-memory, best effort per instance).
-- **Batas per jam** 25 kiriman per undangan, dihitung dari database sehingga tetap
-  berlaku antar instance serverless.
-- **Validasi panjang** dan nilai pada setiap field di server action.
-- Ucapan baru masuk sebagai `PENDING` dan hanya tampil setelah disetujui admin.
-- RLS: anon hanya dapat membaca konten publik; RSVP dan daftar tamu tidak dapat dibaca publik.
+| `SESSION_SECRET` | Hanya untuk admin | Secret cookie sesi admin |
+| `ADMIN_PASSWORD` | Hanya untuk admin | Password login panel admin |
+| `DEMO_ADMIN_HIDDEN` | Tidak | Default `true`; set `false` untuk membuka `/admin` secara lokal |
 
 ## Deployment
 
 1. Buat project Vercel baru dari repository ini (terpisah dari project undangan asli).
-2. Tambahkan seluruh variabel lingkungan di atas. Set `DEMO_ADMIN_HIDDEN="true"`.
-3. Deploy. Setelah domain didapat, perbarui `NEXT_PUBLIC_SITE_URL` dan deploy ulang.
-4. Pastikan `CRON_SECRET` sama dengan yang dikirim Vercel Cron.
-   Pada paket Hobby, cron hanya boleh berjalan sekali sehari — jadwal di `vercel.json`
-   sudah disesuaikan.
-5. Jalankan seed sekali dari mesin lokal yang memiliki `.env` produksi:
-
-   ```bash
-   npm run db:seed
-   ```
+2. Tambahkan `NEXT_PUBLIC_SITE_URL` sesuai domain yang akan dipakai.
+3. Biarkan `DEMO_ADMIN_HIDDEN="true"` dan jangan isi kredensial admin di deployment publik.
+4. Deploy. Halaman undangan akan dirender statis saat build.
 
 ## Struktur Proyek
 
 ```
 src/
   app/
-    undangan/[slug]/     # halaman undangan + server actions RSVP & ucapan
-    admin/               # panel admin (disembunyikan oleh proxy di demo)
-    api/demo/reset/      # endpoint reset data demo (dilindungi CRON_SECRET)
+    undangan/[slug]/     # halaman undangan (dirender dari data statis)
+    admin/               # pratinjau admin read-only (disembunyikan oleh proxy)
   components/invitation/ # komponen UI undangan
-  lib/                   # mapper data, tema, seed demo, rate limit, Supabase
+  components/admin/      # komponen UI admin
+  lib/demo-data.ts       # seluruh data demo (fiktif)
+  lib/use-guest-name.ts  # membaca ?to=Nama di sisi klien
   proxy.ts               # menyembunyikan /admin saat DEMO_ADMIN_HIDDEN aktif
 scripts/
-  seed-demo.ts           # seed/reset data demo
   generate-logo.ps1      # membuat monogram demo
   generate-og-banner.ps1 # membuat banner Open Graph demo
-supabase/schema.sql      # skema database
 ```
 
 ## Kredit & Lisensi Aset

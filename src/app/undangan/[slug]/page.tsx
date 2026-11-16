@@ -2,15 +2,14 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { existsSync } from "node:fs";
 import path from "node:path";
-import { createServerSupabase } from "@/lib/supabase";
 import {
-  mapWedding,
-  mapEnvelopeAccount,
-  mapGalleryPhoto,
-  mapLoveStory,
-  mapWish,
-  mapRows,
-} from "@/lib/mappers";
+  DEMO_SLUG,
+  demoEnvelopeAccounts,
+  demoGallery,
+  demoLoveStories,
+  demoPublicWishes,
+  demoWedding,
+} from "@/lib/demo-data";
 import { MotionRoot, Reveal } from "@/components/invitation/motion";
 import { formatShortDate } from "@/lib/format";
 import { OG_BANNER } from "@/lib/og";
@@ -36,24 +35,21 @@ import DemoBanner from "@/components/invitation/DemoBanner";
 
 type Props = {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ to?: string | string[] }>;
 };
+
+export function generateStaticParams() {
+  return [{ slug: DEMO_SLUG }];
+}
+
+export const dynamicParams = false;
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const supabase = createServerSupabase();
-  if (!supabase) return { title: "Undangan Tidak Ditemukan" };
+  if (slug !== DEMO_SLUG) return { title: "Undangan Tidak Ditemukan" };
 
-  const { data } = await supabase
-    .from("wedding")
-    .select("groom_name, bride_name, event_date, venue_name")
-    .eq("slug", slug)
-    .maybeSingle();
-
-  if (!data) return { title: "Undangan Tidak Ditemukan" };
-
-  const title = `${data.groom_name} & ${data.bride_name}`;
-  const description = `${formatShortDate(new Date(data.event_date))} · ${data.venue_name}. Kami menantikan kehadiran Anda.`;
+  const data = demoWedding;
+  const title = `${data.groomName} & ${data.brideName}`;
+  const description = `${formatShortDate(data.eventDate)} · ${data.venueName}. Kami menantikan kehadiran Anda.`;
   return {
     title,
     description,
@@ -78,54 +74,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function InvitationPage({ params, searchParams }: Props) {
+export default async function InvitationPage({ params }: Props) {
   const { slug } = await params;
-  const { to } = await searchParams;
+  if (slug !== DEMO_SLUG) notFound();
 
-  const supabase = createServerSupabase();
-  if (!supabase) notFound();
-
-  const { data: weddingRow, error: weddingError } = await supabase
-    .from("wedding")
-    .select("*")
-    .eq("slug", slug)
-    .maybeSingle();
-
-  if (weddingError || !weddingRow) notFound();
-
-  const weddingId = weddingRow.id;
-  const [{ data: galleryRows }, { data: wishRows }, { data: storyRows }, { data: envelopeRows }] =
-    await Promise.all([
-      supabase
-        .from("gallery_photo")
-        .select("*")
-        .eq("wedding_id", weddingId)
-        .order("order", { ascending: true }),
-      supabase
-        .from("wish")
-        .select("*")
-        .eq("wedding_id", weddingId)
-        .eq("status", "APPROVED")
-        .order("created_at", { ascending: false }),
-      supabase
-        .from("love_story_item")
-        .select("*")
-        .eq("wedding_id", weddingId)
-        .order("order", { ascending: true }),
-      supabase
-        .from("envelope_account")
-        .select("*")
-        .eq("wedding_id", weddingId)
-        .order("order", { ascending: true }),
-    ]);
-
-  const wedding = mapWedding(weddingRow);
-  const galleryPhotos = mapRows(galleryRows, mapGalleryPhoto);
-  const wishes = mapRows(wishRows, mapWish);
-  const loveStories = mapRows(storyRows, mapLoveStory);
-  const envelopeAccounts = mapRows(envelopeRows, mapEnvelopeAccount);
-
-  const guestName = Array.isArray(to) ? to[0] : to;
+  const wedding = demoWedding;
+  const galleryPhotos = demoGallery;
+  const wishes = demoPublicWishes;
+  const loveStories = demoLoveStories;
+  const envelopeAccounts = demoEnvelopeAccounts;
 
   const heroPhoto = path.join(process.cwd(), "public", "photos", "hero_img.jpeg");
   const backgroundImage = existsSync(heroPhoto)
@@ -146,7 +103,6 @@ export default async function InvitationPage({ params, searchParams }: Props) {
         className="relative z-10 mx-auto flex min-h-[100dvh] w-full max-w-[430px] flex-col bg-[var(--paper)] shadow-2xl ring-1 ring-black/10"
       >
         <OpenGate
-          guestName={guestName ?? null}
           groomName={wedding.groomName}
           brideName={wedding.brideName}
           dateLabel={formatShortDate(wedding.eventDate)}
@@ -213,9 +169,9 @@ export default async function InvitationPage({ params, searchParams }: Props) {
           venueAddress={wedding.venueAddress}
         />
 
-        <RsvpSection slug={slug} guestName={guestName} />
+        <RsvpSection />
 
-        <WishesSection slug={slug} wishes={wishes} />
+        <WishesSection wishes={wishes} />
 
         <ClosingSection
           groomName={wedding.groomName}

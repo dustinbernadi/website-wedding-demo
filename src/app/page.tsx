@@ -1,25 +1,10 @@
-import type { Metadata } from "next";
-import { notFound, redirect } from "next/navigation";
-import { createServerSupabase } from "@/lib/supabase";
+import { redirect } from "next/navigation";
+import { DEMO_SLUG } from "@/lib/demo-data";
 
-export const metadata: Metadata = {
-  title: "Undangan Digital",
+export const metadata = {
+  title: "Undangan Digital · Demo Portofolio",
 };
 
-export const revalidate = 0;
-
-export default async function HomePage() {
-  const supabase = createServerSupabase();
-  if (!supabase) notFound();
-
-  const { data } = await supabase
-    .from("wedding")
-    .select("slug")
-    .order("event_date", { ascending: true })
-    .limit(1)
-    .maybeSingle();
-
-  if (!data?.slug) notFound();
-
-  redirect(`/undangan/${data.slug}`);
+export default function HomePage() {
+  redirect(`/undangan/${DEMO_SLUG}`);
 }

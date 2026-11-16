@@ -1,7 +1,6 @@
 import type { NextRequest } from "next/server";
-import { createAdminSupabase } from "@/lib/supabase-admin";
 import { getSession } from "@/lib/session";
-import { mapRsvp, mapRows } from "@/lib/mappers";
+import { DEMO_SLUG, demoRsvps } from "@/lib/demo-data";
 import { ATTENDANCE_LABELS, csvEscape } from "@/lib/admin-labels";
 
 export async function GET(
@@ -14,27 +13,11 @@ export async function GET(
   }
 
   const { slug } = await params;
-  const supabase = createAdminSupabase();
-  if (!supabase) {
-    return new Response("Database belum dikonfigurasi.", { status: 500 });
-  }
-
-  const { data: wedding } = await supabase
-    .from("wedding")
-    .select("id")
-    .eq("slug", slug)
-    .maybeSingle();
-  if (!wedding) {
+  if (slug !== DEMO_SLUG) {
     return new Response("Undangan tidak ditemukan.", { status: 404 });
   }
 
-  const { data: rsvpRows } = await supabase
-    .from("rsvp")
-    .select("*")
-    .eq("wedding_id", wedding.id)
-    .order("created_at", { ascending: false });
-
-  const rsvps = mapRows(rsvpRows, mapRsvp);
+  const rsvps = demoRsvps;
 
   const header = ["Nama", "Kehadiran", "Jumlah Tamu", "No. HP", "Catatan", "Dibuat", "Diperbarui"];
   const rows = rsvps.map((item) => [

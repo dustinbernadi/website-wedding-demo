@@ -1,30 +1,74 @@
-import type { SupabaseClient } from "@supabase/supabase-js";
+import type {
+  EnvelopeAccount,
+  GalleryPhoto,
+  Guest,
+  LoveStoryItem,
+  Rsvp,
+  Wedding,
+  Wish,
+} from "@/lib/types";
 
+/**
+ * Seluruh data undangan demo. Tidak ada database: halaman undangan dirender
+ * dari data statis ini, dan form publik hanya menyimulasikan interaksi.
+ *
+ * Tanggal relatif (created_at) dihitung saat modul dimuat, sehingga daftar
+ * RSVP/ucapan terlihat "baru" setiap kali situs di-build ulang.
+ */
 export const DEMO_SLUG = "demo-raka-nadia";
+export const DEMO_WEDDING_ID = "demo-raka-nadia";
 
-const CHILD_TABLES = [
-  "gallery_photo",
-  "love_story_item",
-  "envelope_account",
-  "guest",
-  "rsvp",
-  "wish",
-] as const;
+const now = Date.now();
+const daysAgo = (days: number) => new Date(now - days * 86_400_000);
+const hoursAgo = (hours: number) => new Date(now - hours * 3_600_000);
 
-const GALLERY = [
-  { url: "/gallery/gallery1.jpeg", alt: "Momen prewedding Raka & Nadia", order: 1 },
-  { url: "/gallery/gallery2.jpeg", alt: "Kebersamaan di kota tua", order: 2 },
-  { url: "/gallery/gallery3.jpeg", alt: "Upacara di tepi pantai", order: 3 },
-  { url: "/gallery/gallery4.jpeg", alt: "Dekorasi meja resepsi", order: 4 },
-  { url: "/gallery/gallery5.jpeg", alt: "Cincin dan buket pengantin", order: 5 },
-  { url: "/gallery/gallery6.jpeg", alt: "Buket bunga pengantin", order: 6 },
-];
+export const demoWedding: Wedding = {
+  id: DEMO_WEDDING_ID,
+  slug: DEMO_SLUG,
+  groomName: "Raka",
+  brideName: "Nadia",
+  eventDate: new Date("2027-06-12T08:00:00+07:00"),
+  ceremonyTime: new Date("2027-06-12T09:00:00+07:00"),
+  receptionTime: new Date("2027-06-12T11:30:00+07:00"),
+  venueName: "The Lumina Hall",
+  venueAddress: "Jl. Melati Indah No. 12, Kebayoran Baru\nJakarta Selatan 12130",
+  mapsQuery: "Kebayoran Baru, Jakarta Selatan",
+  themeColor: "vintage-gold",
+  musicUrl: null,
+  groomFullName: "Raka Pratama, S.Kom.",
+  brideFullName: "Nadia Putri, S.Ds.",
+  groomParents: "Putra dari\nBpk. Hendra Pratama\nIbu Sari Dewi",
+  brideParents: "Putri dari\nBpk. Ahmad Wijaya\nIbu Ratna Sari",
+  groomInstagram: null,
+  brideInstagram: null,
+  groomPhoto: "/portraits/groom.jpg",
+  bridePhoto: "/portraits/bride.jpg",
+  liveStreamUrl: null,
+  createdAt: new Date("2026-01-05T10:00:00+07:00"),
+  updatedAt: new Date("2026-01-05T10:00:00+07:00"),
+};
 
-const LOVE_STORIES = [
+export const demoGallery: GalleryPhoto[] = [
+  { url: "/gallery/gallery1.jpeg", alt: "Momen prewedding Raka & Nadia" },
+  { url: "/gallery/gallery2.jpeg", alt: "Kebersamaan di kota tua" },
+  { url: "/gallery/gallery3.jpeg", alt: "Upacara di tepi pantai" },
+  { url: "/gallery/gallery4.jpeg", alt: "Dekorasi meja resepsi" },
+  { url: "/gallery/gallery5.jpeg", alt: "Cincin dan buket pengantin" },
+  { url: "/gallery/gallery6.jpeg", alt: "Buket bunga pengantin" },
+].map((item, index) => ({
+  id: `demo-gallery-${index + 1}`,
+  weddingId: DEMO_WEDDING_ID,
+  url: item.url,
+  alt: item.alt,
+  order: index + 1,
+  createdAt: demoWedding.createdAt,
+}));
+
+export const demoLoveStories: LoveStoryItem[] = [
   {
     order: 1,
     title: "Pertemuan Pertama",
-    date_label: "2019",
+    dateLabel: "2019",
     description:
       "Semua dimulai dari sebuah acara kampus yang sederhana.\n\nKami bertemu tanpa rencana, hanya dua orang yang kebetulan duduk di barisan yang sama. Percakapan kecil tentang tugas dan kopi ternyata menjadi awal dari cerita yang jauh lebih panjang.\n\nSaat itu kami belum tahu bahwa pertemuan biasa itu akan menjadi bab pertama dari kisah kami.",
     photo: "/lovestory/love_story_1.jpeg",
@@ -32,7 +76,7 @@ const LOVE_STORIES = [
   {
     order: 2,
     title: "Menjalin Komitmen",
-    date_label: "2023",
+    dateLabel: "2023",
     description:
       "Setelah bertahun-tahun saling mengenal, kami memilih untuk melangkah lebih serius.\n\nAda jarak, ada perbedaan, dan ada banyak proses yang membuat kami belajar memahami satu sama lain. Kami tumbuh bersama, saling menguatkan, dan belajar bahwa cinta bukan hanya tentang rasa, tetapi juga tentang kesetiaan dan komitmen.\n\nDi tahun 2023, kami memutuskan untuk berjalan bersama menuju masa depan.",
     photo: "/lovestory/love_story_2.jpeg",
@@ -40,29 +84,28 @@ const LOVE_STORIES = [
   {
     order: 3,
     title: "Menuju Pelaminan",
-    date_label: "2027",
+    dateLabel: "2027",
     description:
       "Dengan memohon restu keluarga dan kasih Tuhan, kami melangkah ke babak baru.\n\nBukan perjalanan yang selalu mudah, tetapi setiap proses membawa kami pada keyakinan bahwa ini adalah jalan yang ingin kami tempuh bersama.\n\nDi tahun 2027, kami mengucapkan janji suci dan memulai cerita kami sebagai satu keluarga.",
     photo: "/lovestory/love_story_3.jpeg",
   },
-];
+].map((item, index) => ({
+  ...item,
+  id: `demo-story-${index + 1}`,
+  weddingId: DEMO_WEDDING_ID,
+  createdAt: demoWedding.createdAt,
+}));
 
-const ENVELOPE_ACCOUNTS = [
-  {
-    type: "BANK",
-    label: "BCA (Demo)",
-    holder: "Raka Pratama",
-    number: "0000000001",
-    order: 1,
-  },
-  {
-    type: "EWALLET",
-    label: "DANA (Demo)",
-    holder: "Nadia Putri",
-    number: "0000000002",
-    order: 2,
-  },
-];
+export const demoEnvelopeAccounts: EnvelopeAccount[] = [
+  { type: "BANK", label: "BCA (Demo)", holder: "Raka Pratama", number: "0000000001" },
+  { type: "EWALLET", label: "DANA (Demo)", holder: "Nadia Putri", number: "0000000002" },
+].map((item, index) => ({
+  ...item,
+  id: `demo-envelope-${index + 1}`,
+  weddingId: DEMO_WEDDING_ID,
+  order: index + 1,
+  createdAt: demoWedding.createdAt,
+}));
 
 const GUESTS = [
   { name: "Andi Saputra", relation: "Teman kantor" },
@@ -80,6 +123,14 @@ const GUESTS = [
   { name: "Made Bagus", relation: "Teman kuliah" },
   { name: "Nabila Zahra", relation: "Sahabat" },
 ];
+
+export const demoGuests: Guest[] = GUESTS.map((item, index) => ({
+  id: `demo-guest-${index + 1}`,
+  weddingId: DEMO_WEDDING_ID,
+  name: item.name,
+  relation: item.relation,
+  createdAt: daysAgo(GUESTS.length - index),
+}));
 
 const RSVPS = [
   { name: "Andi Saputra", attendance: "HADIR", guestCount: 2, note: "Mohon kursi dekat lorong." },
@@ -101,6 +152,21 @@ const RSVPS = [
   { name: "Qori Ramadan", attendance: "HADIR", guestCount: 2, note: null },
   { name: "Rina Melati", attendance: "HADIR", guestCount: 1, note: null },
 ];
+
+export const demoRsvps: Rsvp[] = RSVPS.map((item, index) => {
+  const createdAt = hoursAgo((RSVPS.length - index) * 2);
+  return {
+    id: `demo-rsvp-${index + 1}`,
+    weddingId: DEMO_WEDDING_ID,
+    name: item.name,
+    attendance: item.attendance,
+    guestCount: item.guestCount,
+    phone: `08120000${String(index + 1).padStart(4, "0")}`,
+    note: item.note,
+    createdAt,
+    updatedAt: createdAt,
+  };
+});
 
 const WISHES = [
   { name: "Andi Saputra", message: "Selamat menempuh hidup baru, Raka & Nadia! Semoga menjadi keluarga yang penuh kasih dan sukacita.", emoji: "🎉", status: "APPROVED" },
@@ -125,135 +191,17 @@ const WISHES = [
   { name: "Xena Lim", message: "Selamat ya! Semoga semua rencana berjalan sesuai harapan.", emoji: "🎉", status: "APPROVED" },
 ];
 
-function buildWeddingPayload() {
-  return {
-    slug: DEMO_SLUG,
-    groom_name: "Raka",
-    bride_name: "Nadia",
-    event_date: new Date("2027-06-12T08:00:00+07:00").toISOString(),
-    ceremony_time: new Date("2027-06-12T09:00:00+07:00").toISOString(),
-    reception_time: new Date("2027-06-12T11:30:00+07:00").toISOString(),
-    venue_name: "The Lumina Hall",
-    venue_address:
-      "Jl. Melati Indah No. 12, Kebayoran Baru\nJakarta Selatan 12130",
-    maps_query: "Kebayoran Baru, Jakarta Selatan",
-    theme_color: "vintage-gold",
-    music_url: null,
-    groom_full_name: "Raka Pratama, S.Kom.",
-    bride_full_name: "Nadia Putri, S.Ds.",
-    groom_parents: "Putra dari\nBpk. Hendra Pratama\nIbu Sari Dewi",
-    bride_parents: "Putri dari\nBpk. Ahmad Wijaya\nIbu Ratna Sari",
-    groom_instagram: null,
-    bride_instagram: null,
-    groom_photo: "/portraits/groom.jpg",
-    bride_photo: "/portraits/bride.jpg",
-    live_stream_url: null,
-  };
-}
+export const demoWishes: Wish[] = WISHES.map((item, index) => ({
+  id: `demo-wish-${index + 1}`,
+  weddingId: DEMO_WEDDING_ID,
+  name: item.name,
+  message: item.message,
+  emoji: item.emoji,
+  status: item.status,
+  createdAt: hoursAgo((WISHES.length - index) * 1.5),
+}));
 
-export type DemoSeedResult = {
-  weddingId: string;
-  gallery: number;
-  loveStories: number;
-  envelopeAccounts: number;
-  guests: number;
-  rsvps: number;
-  wishes: number;
-};
-
-/**
- * Seed (atau reset) data undangan demo. Hanya menyentuh wedding dengan slug
- * demo — wedding lain di database yang sama tidak akan tersentuh.
- */
-export async function seedDemo(supabase: SupabaseClient): Promise<DemoSeedResult> {
-  const now = Date.now();
-  const payload = buildWeddingPayload();
-
-  const { data: existing, error: findError } = await supabase
-    .from("wedding")
-    .select("id")
-    .eq("slug", DEMO_SLUG)
-    .maybeSingle();
-  if (findError) throw findError;
-
-  let weddingId: string;
-
-  if (existing) {
-    weddingId = existing.id;
-    const { error } = await supabase
-      .from("wedding")
-      .update({ ...payload, updated_at: new Date().toISOString() })
-      .eq("id", weddingId);
-    if (error) throw error;
-
-    for (const table of CHILD_TABLES) {
-      const { error: deleteError } = await supabase
-        .from(table)
-        .delete()
-        .eq("wedding_id", weddingId);
-      if (deleteError) throw deleteError;
-    }
-  } else {
-    const { data, error } = await supabase
-      .from("wedding")
-      .insert(payload)
-      .select("id")
-      .single();
-    if (error || !data) throw error ?? new Error("Gagal membuat wedding demo.");
-    weddingId = data.id;
-  }
-
-  const galleryRows = GALLERY.map((item) => ({ ...item, wedding_id: weddingId }));
-  const storyRows = LOVE_STORIES.map((item) => ({ ...item, wedding_id: weddingId }));
-  const envelopeRows = ENVELOPE_ACCOUNTS.map((item) => ({ ...item, wedding_id: weddingId }));
-  const guestRows = GUESTS.map((item, index) => ({
-    ...item,
-    wedding_id: weddingId,
-    created_at: new Date(now - (GUESTS.length - index) * 86_400_000).toISOString(),
-  }));
-  const rsvpRows = RSVPS.map((item, index) => ({
-    ...item,
-    wedding_id: weddingId,
-    phone: `08120000${String(index + 1).padStart(4, "0")}`,
-    created_at: new Date(now - (RSVPS.length - index) * 7_200_000).toISOString(),
-    updated_at: new Date(now - (RSVPS.length - index) * 7_200_000).toISOString(),
-  }));
-  const wishRows = WISHES.map((item, index) => ({
-    ...item,
-    wedding_id: weddingId,
-    created_at: new Date(now - (WISHES.length - index) * 5_400_000).toISOString(),
-  }));
-
-  const inserts = [
-    {
-      table: "gallery_photo",
-      run: () => supabase.from("gallery_photo").insert(galleryRows),
-    },
-    {
-      table: "love_story_item",
-      run: () => supabase.from("love_story_item").insert(storyRows),
-    },
-    {
-      table: "envelope_account",
-      run: () => supabase.from("envelope_account").insert(envelopeRows),
-    },
-    { table: "guest", run: () => supabase.from("guest").insert(guestRows) },
-    { table: "rsvp", run: () => supabase.from("rsvp").insert(rsvpRows) },
-    { table: "wish", run: () => supabase.from("wish").insert(wishRows) },
-  ];
-
-  for (const { table, run } of inserts) {
-    const { error } = await run();
-    if (error) throw new Error(`Gagal mengisi ${table}: ${error.message}`);
-  }
-
-  return {
-    weddingId,
-    gallery: galleryRows.length,
-    loveStories: storyRows.length,
-    envelopeAccounts: envelopeRows.length,
-    guests: guestRows.length,
-    rsvps: rsvpRows.length,
-    wishes: wishRows.length,
-  };
-}
+/** Ucapan yang boleh tampil di undangan publik. */
+export const demoPublicWishes = demoWishes
+  .filter((wish) => wish.status === "APPROVED")
+  .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
