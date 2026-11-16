@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 500" fill="none">
+  <rect width="400" height="500" fill="#FDFBF7"/>
+  <rect x="16" y="16" width="368" height="468" stroke="#B87018" stroke-width="1" fill="none"/>
+  <rect x="24" y="24" width="352" height="452" stroke="#B87018" stroke-width="0.5" stroke-opacity="0.4" fill="none"/>
+  <rect x="40" y="40" width="320" height="380" fill="#F3EAD3" stroke="#B87018" stroke-width="0.5"/>
+  <g opacity="0.3" stroke="#B87018" stroke-width="1">
+    <circle cx="200" cy="190" r="50"/>
+    <circle cx="200" cy="190" r="38"/>
+    <path d="M 170 230 C 180 250 200 260 200 250"/>
+    <path d="M 230 230 C 220 250 200 260 200 250"/>
+    <rect x="180" y="250" width="40" height="50" rx="2" stroke-width="0.5"/>
+    <line x1="200" y1="250" x2="200" y2="300" stroke-width="0.5"/>
+  </g>
+  <g transform="translate(40,40)" stroke="#B87018" stroke-width="1" opacity="0.5">
+    <path d="M 0 0 C 20 10 30 30 20 50"/>
+    <circle cx="10" cy="20" r="4" fill="#F3EAD3"/>
+  </g>
+  <g transform="translate(360,40) scale(-1,1)" stroke="#B87018" stroke-width="1" opacity="0.5">
+    <path d="M 0 0 C 20 10 30 30 20 50"/>
+    <circle cx="10" cy="20" r="4" fill="#F3EAD3"/>
+  </g>
+  <g transform="translate(40,460) scale(1,-1)" stroke="#B87018" stroke-width="1" opacity="0.5">
+    <path d="M 0 0 C 20 10 30 30 20 50"/>
+    <circle cx="10" cy="20" r="4" fill="#F3EAD3"/>
+  </g>
+  <g transform="translate(360,460) scale(-1,-1)" stroke="#B87018" stroke-width="1" opacity="0.5">
+    <path d="M 0 0 C 20 10 30 30 20 50"/>
+    <circle cx="10" cy="20" r="4" fill="#F3EAD3"/>
+  </g>
+  <text x="200" y="460" text-anchor="middle" font-family="serif" font-size="28" font-style="italic" fill="#201810">Groom</text>
+</svg>

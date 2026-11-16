@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="900" viewBox="0 0 900 900" role="img" aria-label="rose">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#FDF6F3"/>
+      <stop offset="52%" stop-color="#F2DCE3"/>
+      <stop offset="100%" stop-color="#DCAEBD"/>
+    </linearGradient>
+    <radialGradient id="halo" cx="0.5" cy="0.42" r="0.5">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.65"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="vignette" cx="0.5" cy="0.5" r="0.75">
+      <stop offset="0%" stop-color="#8E4054" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#8E4054" stop-opacity="0.18"/>
+    </radialGradient>
+    <filter id="blurWash" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="26"/>
+    </filter>
+    <filter id="blurSoft" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="10"/>
+    </filter>
+  </defs>
+  <rect width="900" height="900" fill="url(#bg)"/>
+  <rect width="900" height="900" fill="url(#halo)"/>
+  <circle cx="210" cy="150" r="46" fill="#FFFFFF" opacity="0.35" filter="url(#blurSoft)"/><circle cx="700" cy="240" r="34" fill="#FFFFFF" opacity="0.35" filter="url(#blurSoft)"/><circle cx="150" cy="720" r="40" fill="#FFFFFF" opacity="0.35" filter="url(#blurSoft)"/><circle cx="760" cy="700" r="26" fill="#FFFFFF" opacity="0.35" filter="url(#blurSoft)"/><circle cx="520" cy="820" r="30" fill="#FFFFFF" opacity="0.35" filter="url(#blurSoft)"/><circle cx="320" cy="120" r="22" fill="#FFFFFF" opacity="0.35" filter="url(#blurSoft)"/>
+  <ellipse cx="168" cy="216" rx="150" ry="95" transform="rotate(-26 168 216)" fill="#F2DCE3" opacity="0.5" filter="url(#blurWash)"/><ellipse cx="736" cy="704" rx="170" ry="105" transform="rotate(34 736 704)" fill="#F2DCE3" opacity="0.5" filter="url(#blurWash)"/><ellipse cx="560" cy="148" rx="128" ry="82" transform="rotate(58 560 148)" fill="#F2DCE3" opacity="0.5" filter="url(#blurWash)"/><ellipse cx="96" cy="640" rx="110" ry="78" transform="rotate(18 96 640)" fill="#F2DCE3" opacity="0.5" filter="url(#blurWash)"/>
+  <g color="#B0536B" transform="rotate(0 450 450)">
+    <path d="M 120 220 Q 110 160 46 150" fill="none" stroke="currentColor" stroke-width="2.5" stroke-opacity="0.55" stroke-linecap="round"/><g fill="none" stroke="currentColor" stroke-opacity="0.8" stroke-width="2">
+    <circle cx="65.6" cy="150.2" r="11"/><circle cx="52.2" cy="165" r="11"/><circle cx="32.6" cy="160.9" r="11"/><circle cx="26.4" cy="141.8" r="11"/><circle cx="39.8" cy="127" r="11"/><circle cx="59.4" cy="131.1" r="11"/>
+    <circle cx="46" cy="146" r="4.5" fill="currentColor" fill-opacity="0.6" stroke="none"/>
+  </g><g fill="none" stroke="currentColor" stroke-opacity="0.8" stroke-width="2">
+    <circle cx="120.6" cy="222.1" r="6.8"/><circle cx="108.8" cy="218.3" r="6.8"/><circle cx="106.2" cy="206.2" r="6.8"/><circle cx="115.4" cy="197.9" r="6.8"/><circle cx="127.2" cy="201.7" r="6.8"/><circle cx="129.8" cy="213.8" r="6.8"/>
+    <circle cx="118" cy="210" r="2.8" fill="currentColor" fill-opacity="0.6" stroke="none"/>
+  </g><path transform="translate(96 170) rotate(-38) scale(1)" d="M0 0 C 16 -10 28 -5 30 6 C 16 12 5 9 0 0 Z" fill="currentColor" fill-opacity="0.45" stroke="none"/><path transform="translate(74 128) rotate(24) scale(0.8)" d="M0 0 C 16 -10 28 -5 30 6 C 16 12 5 9 0 0 Z" fill="currentColor" fill-opacity="0.45" stroke="none"/>
+    <path d="M 720 760 Q 756 706 806 692" fill="none" stroke="currentColor" stroke-width="2.5" stroke-opacity="0.55" stroke-linecap="round"/><g fill="none" stroke="currentColor" stroke-opacity="0.8" stroke-width="2">
+    <circle cx="816.7" cy="695" r="7.7"/><circle cx="803.6" cy="699.8" r="7.7"/><circle cx="792.8" cy="690.8" r="7.7"/><circle cx="795.3" cy="677" r="7.7"/><circle cx="808.4" cy="672.2" r="7.7"/><circle cx="819.2" cy="681.2" r="7.7"/>
+    <circle cx="806" cy="686" r="3.1" fill="currentColor" fill-opacity="0.6" stroke="none"/>
+  </g><path transform="translate(762 720) rotate(30) scale(0.8)" d="M0 0 C 16 -10 28 -5 30 6 C 16 12 5 9 0 0 Z" fill="currentColor" fill-opacity="0.45" stroke="none"/><path transform="translate(748 754) rotate(-28) scale(0.9)" d="M0 0 C 16 -10 28 -5 30 6 C 16 12 5 9 0 0 Z" fill="currentColor" fill-opacity="0.45" stroke="none"/>
+  </g>
+  <g color="#B0536B"><ellipse cx="132" cy="318" rx="9" ry="20" transform="rotate(14 132 318)" fill="none" stroke="#B0536B" stroke-opacity="0.55" stroke-width="2"/><ellipse cx="252" cy="486" rx="11" ry="23" transform="rotate(42 252 486)" fill="none" stroke="#B0536B" stroke-opacity="0.55" stroke-width="2"/><ellipse cx="664" cy="262" rx="8" ry="17" transform="rotate(-32 664 262)" fill="none" stroke="#B0536B" stroke-opacity="0.55" stroke-width="2"/><ellipse cx="622" cy="616" rx="10" ry="21" transform="rotate(22 622 616)" fill="none" stroke="#B0536B" stroke-opacity="0.55" stroke-width="2"/><ellipse cx="372" cy="768" rx="9" ry="18" transform="rotate(-14 372 768)" fill="none" stroke="#B0536B" stroke-opacity="0.55" stroke-width="2"/><ellipse cx="700" cy="432" rx="7" ry="15" transform="rotate(8 700 432)" fill="none" stroke="#B0536B" stroke-opacity="0.55" stroke-width="2"/></g>
+  <rect x="40" y="40" width="820" height="820" rx="10" fill="none" stroke="#B0536B" stroke-opacity="0.3" stroke-width="1.5"/>
+  <rect x="52" y="52" width="796" height="796" rx="8" fill="none" stroke="#B0536B" stroke-opacity="0.16" stroke-width="1"/>
+  <rect width="900" height="900" fill="url(#vignette)"/>
+</svg>
