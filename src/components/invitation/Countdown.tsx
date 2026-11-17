@@ -103,7 +103,7 @@ export default function Countdown() {
                       ? { duration: 0 }
                       : { type: "spring", stiffness: 280, damping: 18 }
                   }
-                  className="font-headline text-[26px] leading-none tracking-wide tabular-nums min-[360px]:text-3xl sm:text-5xl sm:tracking-wider"
+                  className="font-headline text-[26px] leading-none tracking-wide tabular-nums min-[360px]:text-3xl"
                 >
                   {String(item.value).padStart(2, "0")}
                 </motion.p>
