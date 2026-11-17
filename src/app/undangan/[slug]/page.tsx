@@ -145,7 +145,7 @@ export default async function InvitationPage({ params }: Props) {
         >
           <Reveal>
             <SectionHeading eyebrow="Menanti Hari Bahagia" title="Menuju Hari Bahagia" />
-            <Countdown target={wedding.eventDate} />
+            <Countdown />
           </Reveal>
         </section>
 

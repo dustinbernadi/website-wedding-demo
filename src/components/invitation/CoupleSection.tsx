@@ -1,5 +1,4 @@
 import SectionHeading from "./SectionHeading";
-import { LatinCross } from "./FlowerOrnament";
 import { Reveal } from "./motion";
 
 export type CoupleProfile = {
@@ -111,10 +110,7 @@ export default function CoupleSection({ groom, bride }: Props) {
               <br />
               &amp;
               <br />
-              <span className="whitespace-nowrap">
-                Ibu Sari Dewi (
-                <LatinCross className="mx-[0.2em] h-[0.7em] w-[0.7em]" />)
-              </span>
+              <span className="whitespace-nowrap">Ibu Sari Dewi</span>
             </>
           }
           subtitle="Dengan memohon berkat dan kasih Tuhan Yesus Kristus, kami bermaksud menyelenggarakan acara pernikahan kami"
